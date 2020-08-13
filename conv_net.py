@@ -29,23 +29,8 @@ def one_hot_encode(labels):
     one_hot_encode[np.arange(n_labels), labels[:, 0]] = 1
     return one_hot_encode
 
-# def get_signals_and_save_all_together(paths_list):
-#     matrix = np.zeros((1, 256001))
-#     for path in paths_list:
-#         data = np.load(path, allow_pickle=True)
-#         signal = np.concatenate((np.array(list(data[:, 0])), data[:, 1].reshape((data[:, 1].shape[0], 1)).astype(np.float32)), axis=1)
-#         matrix = np.vstack((matrix, signal))
-#     matrix = matrix[1:]
-#     matrix = matrix[np.random.permutation(matrix.shape[0])]
-#     partition = int(matrix.shape[0] * 0.9)
-#     train_set = matrix[:partition]
-#     test_set = matrix[partition:]
-#     print(train_set.shape, test_set.shape)
-#     np.save('numpyFiles/d=200/train_delete', train_set)
-#     np.save('numpyFiles/d=200/test_delete', test_set)
 
 
-[]
 def get_xy_from_malmag():
 
     matrix = np.load(INPUT_PATH + "train_set.npy")[:7000]
@@ -82,33 +67,6 @@ def get_xy_from_malmag():
 
 
 
-# x_test, y_test = val.drop(columns=['inNo', 'inNo2', 'inO3']).values, zv
-# print(x_train.shape, y_train.shape, x_test.shape, y_test.shape)
-#
-#
-#
-# train_expectation = np.mean(x_train)
-# train_var = np.var(x_train)
-# x_train = (x_train - train_expectation) / train_var
-# x_test = (x_test - train_expectation) / train_var
-
-
-# x_train, y_train = choose_random(x_train, y_train)
-# Add a channels dimension
-
-
-
-# x_train = tf.reshape(x_train, [x_train.shape[0],x_train.shape[2], x_train.shape[1]])
-# x_test = x_test[..., tf.newaxis]
-
-
-# x_test = tf.reshape(x_test, [x_test.shape[0],x_test.shape[2], x_test.shape[1]])
-
-# train_expectation = -107.04907063307573
-#
-# train_std = 952.0
-
-
 def gen():
     pathes = ['/cs/ep/519/Data/2_vs_1_train.npy']
     for path in pathes:
@@ -129,12 +87,12 @@ def gen():
 
 
 
+#if the data is too big, we want to use generator:
 
 # train_ds = tf.data.Dataset.from_generator(gen, (tf.float64, tf.float64),output_shapes=(tf.TensorShape([256000, 1, 1]), tf.TensorShape([1])))#.batch(64).take(64)
 # test_ds = tf.data.Dataset.from_generator(gen, (tf.float64, tf.float64), (tf.TensorShape([256000, 1, 1]), tf.TensorShape([1]))).batch(64)
 
 
-# python3 /cs/ep/514/Snir/vm/net11.05.py
 train_set = np.load('/cs/ep/519/Data/penny_train.npy', allow_pickle=True)
 test_set = np.load('/cs/ep/519/Data/penny_test.npy', allow_pickle=True)
 
@@ -142,18 +100,19 @@ x_train, y_train = train_set[:, :-1], train_set[:, -1] -1
 x_test, y_test = test_set[:, :-1], test_set[:, -1] -1
 
 
+#normalize the data
 train_expectation = np.mean(x_train)
 train_std = np.std(x_train)
 x_train = (x_train - train_expectation) / train_std
 x_test = (x_test - train_expectation) / train_std
 
-# x_test = (x_test - train_expectation) / train_std
 
 x_train = x_train[..., tf.newaxis, tf.newaxis]
 x_test = x_test[..., tf.newaxis, tf.newaxis]
 
 
 # train_ds = tf.data.Dataset.from_generator(gen, (tf.float64, tf.float64), (tf.TensorShape([256000, 1, 1]), tf.TensorShape([1]))).batch(64)
+
 train_ds = tf.data.Dataset.from_tensor_slices((x_train, y_train)).batch(64)
 test_ds = tf.data.Dataset.from_tensor_slices((x_test, y_test)).batch(64)
 
@@ -174,75 +133,38 @@ class MyModel(Model):
         self.pool6 = MaxPool2D((4, 1))
         self.conv7 = Conv2D(16, (12, 1), activation='relu')
         self.pool7 = MaxPool2D((4, 1))
-        self.conv8 = Conv2D(16, (14, 1), activation='relu')
-        self.pool8 = MaxPool2D((4, 1))
-        self.conv9 = Conv2D(16, (14, 1), activation='relu')
-        self.pool9 = MaxPool2D((4, 1))
-        self.conv10 = Conv2D(16, (14, 1), activation='relu')
-        self.pool10 = MaxPool2D((4, 1))
 
         self.flatten = Flatten()
         self.d1 = Dense(8, activation='relu')
-        self.drop = Dropout(0.5)
         self.d2 = Dense(4, activation='softmax')
 
 
-        # self.batch_norm = BatchNormalization(axis=-1)
 
     def call(self, x, training=False):
-        # print(x.shape)
-        # x = self.batch_norm(x)
-        print(x.shape)
         x = self.conv1(x)
-        print(x.shape)
         x = self.pool1(x)
-        print(x.shape)
-        x = self.conv2(x)
-        print(x.shape)
-        x = self.pool2(x)
-        print(x.shape)
-        x = self.conv3(x)
-        print(x.shape)
-        x = self.pool3(x)
-        print(x.shape)
-        x = self.conv4(x)
-        print(x.shape)
-        x = self.pool4(x)
-        print(x.shape)
-        x = self.conv5(x)
-        print(x.shape)
-        x = self.pool5(x)
-        print(x.shape)
-        x = self.conv6(x)
-        print(x.shape)
-        x = self.pool6(x)
-        print(x.shape)
-        x = self.conv7(x)
-        print(x.shape)
-        x = self.pool7(x)
-        print(x.shape)
-        # x = self.conv8(x)
-        # print(x.shape)
-        # x = self.pool8(x)
-        # print(x.shape)
-        # x = self.conv9(x)
-        # print(x.shape)
-        # x = self.pool9(x)
-        # print(x.shape)
-        # x = self.conv10(x)
-        # print(x.shape)
-        # x = self.pool10(x)
-        # print(x.shape)
 
+        x = self.conv2(x)
+        x = self.pool2(x)
+
+        x = self.conv3(x)
+        x = self.pool3(x)
+
+        x = self.conv4(x)
+        x = self.pool4(x)
+
+        x = self.conv5(x)
+        x = self.pool5(x)
+
+        x = self.conv6(x)
+        x = self.pool6(x)
+
+        x = self.conv7(x)
+        x = self.pool7(x)
 
         x = self.flatten(x)
-        print(x.shape)
         x = self.d1(x)
-        # print(x.shape)
-        # x = self.drop(x)
-        print(x.shape)
         x = self.d2(x)
-        print(x.shape)
         return x
 
 # Create an instance of the model
@@ -287,19 +209,13 @@ for epoch in range(EPOCHS):
     train_accuracy.reset_states()
     test_loss.reset_states()
     test_accuracy.reset_states()
-    # counter = 0
     for images, labels in train_ds:
-        # counter += 1
-        # if counter%20 == 0:
-        #     print(counter)
-        # print("---------------------------------", counter, images[0, 0].__getitem__(), labels.shape, "-------------------------------")
         train_step(images, labels)
 
     train_acc_lst.append(train_accuracy.result()*100)
     train_loss_lst.append(train_loss.result())
 
     for test_images, test_labels in test_ds:
-        # print(test_images.shape)
         test_step(test_images, test_labels)
 
     test_acc_lst.append(test_accuracy.result()*100)
@@ -323,7 +239,5 @@ plt.plot(test_acc_lst)
 plt.legend(["Train Accuracy", "Test Accuracy"])
 plt.title('Accuracy')
 plt.show()
-weights = model.get_weights()
-np.save('/cs/ep/519/Snir/outputs/snir_tries', weights)
-model.save_weights('/cs/ep/519/Snir/outputs/weights_64_16_4(30).h5')
+
 
