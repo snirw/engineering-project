@@ -44,6 +44,7 @@ def one_hot_encode(labels):
 #     np.save('numpyFiles/d=200/train_delete', train_set)
 #     np.save('numpyFiles/d=200/test_delete', test_set)
 
+
 []
 def get_xy_from_malmag():
 
